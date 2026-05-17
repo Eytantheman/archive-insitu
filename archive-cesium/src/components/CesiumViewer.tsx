@@ -4,7 +4,6 @@ import type { HousingProject } from '../types';
 // Cesium is loaded via CDN script tag — access the global
 declare const Cesium: typeof import('cesium');
 
-const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_TILES_KEY as string;
 const ACCENT = '#C4623A';
 
 export interface FlyTarget {
@@ -34,7 +33,7 @@ export function CesiumViewer({ projects, tourProjects, flyToTarget, onProjectSel
   useEffect(() => {
     if (!containerRef.current || viewerRef.current) return;
 
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc4ZDkiLCJpZCI6NTc3MzMsImlhdCI6MTYyMzMwNDUwN30.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxk';
+    Cesium.Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN as string;
 
     const viewer = new Cesium.Viewer(containerRef.current, {
       animation:            false,
@@ -60,10 +59,8 @@ export function CesiumViewer({ projects, tourProjects, flyToTarget, onProjectSel
     viewerRef.current = viewer;
 
     // ── Google Photorealistic 3D Tiles ────────────────────────────────────
-    Cesium.Cesium3DTileset.fromUrl(
-      `https://tile.googleapis.com/v1/3dtiles/root.json?key=${GOOGLE_KEY}`,
-      { showCreditsOnScreen: true },
-    ).then((tileset: any) => {
+    Cesium.Cesium3DTileset.fromIonAssetId(2275207, { showCreditsOnScreen: true })
+    .then((tileset: any) => {
       tilesetRef.current = tileset;
       viewer.scene.primitives.add(tileset);
 
@@ -190,7 +187,8 @@ export function CesiumViewer({ projects, tourProjects, flyToTarget, onProjectSel
         pitch:   Cesium.Math.toRadians(flyToTarget.pitch ?? -25),
         roll:    0,
       },
-      duration: 2,
+      duration: 3.5,
+      easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
     });
   }, [flyToTarget]);
 
